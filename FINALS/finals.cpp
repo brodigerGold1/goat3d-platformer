@@ -51,8 +51,8 @@ vector<Platform> level2Platforms = {
     {0, -0.5, 2.5, 0.3,   0.5f, 0.3f, 0.7f},
     {-7, 1, 0.5, 0.3,     0.5f, 0.3f, 0.7f},
     {-2, 2, 2.5, 0.3,     0.5f, 0.3f, 0.7f},
-    {-10, 3.5, 0.5, 0.3,  0.5f, 0.3f, 0.7f},
-    {6, 2, 3, 0.3,        0.5f, 0.3f, 0.7f},
+    {-9, 3.5, 0.5, 0.3,   0.5f, 0.3f, 0.7f},
+    {6, 2, 4, 0.3,        0.5f, 0.3f, 0.7f},
     {6, 0, 3, 0.3,        0.5f, 0.3f, 0.7f},
     {-10, -5, 0.5, 10,    0.5f, 0.3f, 0.2f},
     {10, -5, 0.5, 10,     0.5f, 0.3f, 0.2f},
@@ -63,7 +63,7 @@ vector<Collectible> level1Coins = {
 };
 
 vector<Collectible> level2Coins = {
-    {-10 + 0.1f, 3.5 + 0.3 + 0.05f, 0.3f, 0.3f, 1.0f, 1.0f, 0.0f},
+    {-9 + 0.1f, 3.5 + 0.3 + 0.05f, 0.3f, 0.3f, 1.0f, 1.0f, 0.0f},
 };
 
 vector<Light> level1Lights = {
@@ -71,7 +71,7 @@ vector<Light> level1Lights = {
 };
 
 vector<Light> level2Lights = {
-    {6 + 3 - 0.3f, 2 + 0.3 + 0.05f, 0.4f, 0.6f, 1.0f, 1.0f, 0.5f},
+    {9.2f, 2 + 0.3 + 0.05f, 0.4f, 0.6f, 1.0f, 1.0f, 0.5f},
 };
 
 vector<Platform>* platforms = &level1Platforms;
@@ -290,6 +290,7 @@ void init() {
     createCheckerTexture();
     createCoinTexture();
 
+    win::loadWinSound();  // load win jingle at startup
     setupProjection();
     switchLevel(1);
 }

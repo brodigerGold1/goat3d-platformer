@@ -259,6 +259,8 @@ static void playWinSound() {
     if (!wavReady) loadWinSound();
     if (wavReady)
         PlaySoundA((LPCSTR)wav.data(), NULL, SND_MEMORY | SND_ASYNC | SND_LOOP | SND_NODEFAULT);
+    else
+        PlaySoundA(WIN_WAV, NULL, SND_FILENAME | SND_ASYNC | SND_LOOP | SND_NODEFAULT);
 #endif
 }
 static void stopWinSound() {
