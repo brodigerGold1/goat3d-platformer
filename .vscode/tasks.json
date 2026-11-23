@@ -1,0 +1,32 @@
+{
+    "version": "2.0.0",
+    "tasks": [
+        {
+            "label": "Build Graphics Finals",
+            "type": "process",
+            "command": "D:/msys64/ucrt64/bin/g++.exe",
+            "args": [
+                "-g",
+                "-std=c++17",
+                "${workspaceFolder}/FINALS/finals.cpp",
+                "-o",
+                "${workspaceFolder}/FINALS/finals.exe",
+                "-lfreeglut",
+                "-lopengl32",
+                "-lglu32",
+				"-lglew32",
+				"-lwinmm",
+            ],
+            "options": {
+                "env": {
+                    "PATH": "D:\\msys64\\ucrt64\\bin;${env:PATH}"
+                }
+            },
+            "problemMatcher": "$gcc",
+            "group": {
+                "kind": "build",
+                "isDefault": true
+            }
+        }
+    ]
+}

@@ -1,0 +1,24 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "Run Graphics Finals",
+            "type": "cppdbg",
+            "request": "launch",
+            "program": "${workspaceFolder}/FINALS/finals.exe",
+            "args": [],
+            "stopAtEntry": false,
+            "cwd": "${workspaceFolder}/FINALS",
+            "environment": [
+                {
+                    "name": "PATH",
+                    "value": "D:/msys64/ucrt64/bin;${env:PATH}"
+                }
+            ],
+            "externalConsole": false,
+            "MIMode": "gdb",
+            "miDebuggerPath": "D:/msys64/ucrt64/bin/gdb.exe",
+            "preLaunchTask": "Build Graphics Finals"
+        }
+    ]
+}
