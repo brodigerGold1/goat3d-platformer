@@ -4,6 +4,7 @@
 #include <cmath>
 #include <GL/glew.h>
 #include <GL/glut.h>
+#include "winscreen.h"
 
 using namespace std;
 
@@ -25,6 +26,9 @@ struct Light {
 };
 
 int currentLevel = 1;
+
+enum AppState { STATE_LEVEL, STATE_WIN };
+AppState appState = STATE_LEVEL;
 
 vector<Platform> level1Platforms = {
     {-10, -5, 20, 1,   0.3f, 0.5f, 0.3f},
@@ -208,8 +212,12 @@ float frameTime = 0;
 void display() {
     glClear(GL_COLOR_BUFFER_BIT);
     glLoadIdentity();
-    
-    frameTime += 0.016f;
+
+    static float lastT = 0;
+    float now = glutGet(GLUT_ELAPSED_TIME) / 1000.0f;
+    float dt = now - lastT; lastT = now;
+    frameTime = now;
+
     for (auto& c : *coins) c.bobOffset = sin(frameTime * 2 + c.x) * 0.05f;
     for (auto& l : *lights) l.pulse = frameTime * 4;
     
@@ -250,14 +258,30 @@ void display() {
         drawText(-9.8f, 3.8f, "Purple platforms | Dark green ground sections | Gold coin | Yellow exit", 0.8f, 0.8f, 0.8f);
     }
     drawText(-9.8f, -4.8f, "ESC to exit", 0.5f, 0.5f, 0.5f);
-    
+
+    if (appState == STATE_WIN) { win::draw(dt); setupProjection(); }   // popup overlay on top of the level
+
     glutSwapBuffers();
 }
 
 void keyboard(unsigned char key, int x, int y) {
+    if (appState == STATE_WIN) { win::key(key); return; }
     if (key == 27) exit(0);
     if (key == '1') switchLevel(1);
     if (key == '2') switchLevel(2);
+    if ((key == 'c' || key == 'C') && currentLevel == 1) { appState = STATE_WIN; win::show(); } // demo: wire to exit collision
+}
+
+void mouse(int btn, int state, int x, int y) {
+    if (appState != STATE_WIN || btn != GLUT_LEFT_BUTTON || state != GLUT_DOWN) return;
+    int w = glutGet(GLUT_WINDOW_WIDTH), h = glutGet(GLUT_WINDOW_HEIGHT);
+    win::click(x * win::VW / w, y * win::VH / h);
+}
+
+void passiveMotion(int x, int y) {
+    if (appState != STATE_WIN) return;
+    int w = glutGet(GLUT_WINDOW_WIDTH), h = glutGet(GLUT_WINDOW_HEIGHT);
+    win::motion(x * win::VW / w, y * win::VH / h);
 }
 
 void init() {
@@ -265,6 +289,7 @@ void init() {
     srand(12345);
     createCheckerTexture();
     createCoinTexture();
+
     setupProjection();
     switchLevel(1);
 }
@@ -280,8 +305,13 @@ int main(int argc, char** argv) {
     if (err != GLEW_OK) return -1;
     
     init();
+    win::onNextLevel = [](){ win::stopWinSound(); switchLevel(2); appState = STATE_LEVEL; };
+    win::onReplay    = [](){ win::show(); };
+    win::onMenu      = [](){ win::stopWinSound(); appState = STATE_LEVEL; };
     glutDisplayFunc(display);
     glutKeyboardFunc(keyboard);
+    glutMouseFunc(mouse);
+    glutPassiveMotionFunc(passiveMotion);
     glutIdleFunc(display);
     glutMainLoop();
     return 0;
