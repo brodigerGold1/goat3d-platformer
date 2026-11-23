@@ -47,19 +47,19 @@ vector<Platform> level1Platforms = {
 };
 
 vector<Platform> level2Platforms = {
-    {-10, -5, 5, 1,    0.2f, 0.4f, 0.2f},
-    {-2, -5, 3, 1,     0.2f, 0.4f, 0.2f},
-    {4, -5, 6, 1,      0.2f, 0.4f, 0.2f},
-    {-8, -2.5, 2.5, 0.3,  0.5f, 0.3f, 0.7f},
-    {-4, -1.5, 2.5, 0.3,  0.5f, 0.3f, 0.7f},
-    {0, -0.5, 2.5, 0.3,   0.5f, 0.3f, 0.7f},
-    {-7, 1, 0.5, 0.3,     0.5f, 0.3f, 0.7f},
-    {-2, 2, 2.5, 0.3,     0.5f, 0.3f, 0.7f},
-    {-9, 3.5, 0.5, 0.3,   0.5f, 0.3f, 0.7f},
-    {6, 2, 4, 0.3,        0.5f, 0.3f, 0.7f},
-    {6, 0, 3, 0.3,        0.5f, 0.3f, 0.7f},
-    {-10, -5, 0.5, 10,    0.5f, 0.3f, 0.2f},
-    {10, -5, 0.5, 10,     0.5f, 0.3f, 0.2f},
+    {-10, -5, 5, 1,         0.2f, 0.4f, 0.2f},
+    {-2, -5, 3, 1,          0.2f, 0.4f, 0.2f},
+    {4, -5, 6, 1,           0.2f, 0.4f, 0.2f},
+    {-8, -2.5, 2.5, 0.3,    0.5f, 0.3f, 0.7f},
+    {-4, -1.5, 2.5, 0.3,    0.5f, 0.3f, 0.7f},
+    {0, -0.5, 2.5, 0.3,     0.5f, 0.3f, 0.7f},
+    {-7, 1, 0.5, 0.3,       0.5f, 0.3f, 0.7f},
+    {-2, 2, 2.5, 0.3,       0.5f, 0.3f, 0.7f},
+    {-9, 3.5, 0.5, 0.3,     0.5f, 0.3f, 0.7f},
+    {6, 2, 4, 0.3,          0.5f, 0.3f, 0.7f},
+    {6, 0, 3, 0.3,          0.5f, 0.3f, 0.7f},
+    {-10, -5, 0.5, 10,      0.5f, 0.3f, 0.2f},
+    {10, -5, 0.5, 10,       0.5f, 0.3f, 0.2f},
 };
 
 vector<Collectible> level1Coins = {
@@ -81,6 +81,31 @@ vector<Light> level2Lights = {
 vector<Platform>* platforms = &level1Platforms;
 vector<Collectible>* coins = &level1Coins;
 vector<Light>* lights = &level1Lights;
+
+
+
+//////////////////////////// PLAYER //////////////////////////////////////////////////////////
+
+// Player rectangle (for collision detection)
+float playerX = 0.0f;
+float playerY = 1.0f;
+float playerWidth  = 0.8f;
+float playerHeight = 1.2f;
+
+// Player physics
+bool moveLeft  = false;
+bool moveRight = false;
+
+float horizontalSpeed = 0.08f;
+float verticalSpeed = 0.0f;
+
+const float gravity = -0.015f;
+const float jumpForce = 0.30f;
+
+bool isOnGround = false;
+
+// Ground position
+const float groundY = 0.0f;
 
 
 
@@ -183,6 +208,8 @@ void drawGrass(float x, float y, float w) {
     }
 }
 
+/////////////////////////////// LIGHTS CAMERA ACTION ////////////////////////////////////////
+
 void drawLight(float x, float y, float w, float h, float r, float g, float b, float pulse) {
     glDisable(GL_TEXTURE_2D);
     glColor4f(r, g, b, 0.25f + 0.2f * sin(pulse));
@@ -226,6 +253,118 @@ void switchLevel(int level) {
 float frameTime = 0;
 
 
+///////////////////////////// PLAYER APPEARANCE ///////////////////////////////////////////////
+void drawPlayer() {
+    glPushMatrix();
+    glTranslatef(playerX, playerY, 0.0f);
+
+    glColor3f(0.2f, 0.0f, 1.0f);
+    glBegin(GL_QUADS);
+        glVertex2f(-playerWidth / 2, 0.0f);
+        glVertex2f( playerWidth / 2, 0.0f);
+        glVertex2f( playerWidth / 2, playerHeight);
+        glVertex2f(-playerWidth / 2, playerHeight);
+    glEnd();
+
+    glPopMatrix();
+}
+
+
+
+///////////////////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////// PHYSICS ////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////////////////////
+
+// Player repositioning with gravity and ground collision
+void updatePlayer() {
+    
+    // Previous position
+    float previousX = playerX;
+    float previousY = playerY;
+
+    // Horizontal movement
+    if (moveLeft)   playerX -= horizontalSpeed;
+    if (moveRight)  playerX += horizontalSpeed;
+
+    // Player surfaces
+    float playerLeft = playerX - playerWidth / 2;
+    float playerRight = playerX + playerWidth / 2;
+    float playerBottom = playerY;
+    float playerTop = playerY + playerHeight;
+
+    // Horizontal collision with platform sides
+    for (const Platform& p : *platforms) {
+        // Determine overlap of player and platform surfaces
+        bool verticalOverlap =
+            playerTop > p.y &&          // Player top below platform top AND&&
+            playerBottom < p.y + p.h;   // Player bottom above platform bottom
+        bool horizontalOverlap =
+            playerRight > p.x &&        // Player right to the right of platform left AND
+            playerLeft < p.x + p.w;     // Player left to the left of platform right
+
+        // If true, no more moving that way
+        if (verticalOverlap && horizontalOverlap) {
+            if (moveRight)
+                playerX = p.x - playerWidth / 2.0f;
+            else if (moveLeft)
+                playerX = p.x + p.w + playerWidth / 2.0f;
+
+            playerLeft  = playerX - playerWidth / 2.0f;
+            playerRight = playerX + playerWidth / 2.0f;
+        }
+    }
+
+    // Vertical movement + gravity
+    verticalSpeed += gravity;
+    playerY += verticalSpeed;
+
+    // Reset player surfaces after potential horizontal collision adjustments
+    playerBottom = playerY;
+    playerTop = playerY + playerHeight;
+    isOnGround = false;
+
+    // Vertical collision with platform tops and bottoms
+    for (const Platform& p : *platforms)
+    {
+        bool horizontalOverlap =
+            playerRight > p.x &&
+            playerLeft < p.x + p.w;
+
+        float platformBottom = p.y;
+        float platformTop = p.y + p.h;
+
+        // Landing on top while falling
+        bool onTop =
+            verticalSpeed <= 0.0f &&
+            previousY >= platformTop &&
+            playerBottom <= platformTop;
+        if (horizontalOverlap && onTop) {
+            // Modify playerY directly to avoid overlap
+            playerY = platformTop;
+            verticalSpeed = 0.0f;
+            isOnGround = true;
+        }
+
+        // Hitting the underside while jumping
+        bool owMyHead =
+            verticalSpeed > 0.0f &&
+            previousY + playerHeight <= platformBottom &&
+            playerTop >= platformBottom;
+        if (horizontalOverlap && owMyHead) {
+            // Modify playerY directly to avoid overlap
+            playerY = platformBottom - playerHeight;
+            verticalSpeed = 0.0f;
+        }
+    }
+
+    glutPostRedisplay();
+}
+
+// Timer for consistent movement across frames
+void timer(int value) {
+    updatePlayer();
+    glutTimerFunc(16, timer, 0); // Approximately 60 FPS
+}
 
 ///////////////////////////////////////////////////////////////////////////////////////////////
 /////////////////////////////////////// DISPLAY FUNCTION //////////////////////////////////////
@@ -270,6 +409,9 @@ void display() {
     for (auto& l : *lights) {
         drawLight(l.x, l.y, l.w, l.h, l.r, l.g, l.b, l.pulse);
     }
+
+    // Player
+    drawPlayer();
     
     // UI
     if (currentLevel == 1) {
@@ -289,26 +431,51 @@ void display() {
 
 
 ///////////////////////////////////////////////////////////////////////////////////////////////
-/////////////////////////////////////////// CONTROLS //////////////////////////////////////////
+////////////////////////////////////////// CONTROLS ///////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////////////////////////////
 
 void keyboard(unsigned char key, int x, int y) {
     if (appState == STATE_WIN) { win::key(key); return; }
+
+    // Menu
     if (key == 27) exit(0);
     if (key == '1') switchLevel(1);
     if (key == '2') switchLevel(2);
     if ((key == 'c' || key == 'C') && currentLevel == 1) { appState = STATE_WIN; win::show(); } // demo: wire to exit collision
+    
+    // Player movement
+    if (key == 'a') moveLeft = true;
+    if (key == 'd') moveRight = true;
+    if (key == ' ' && isOnGround)
+    {
+        verticalSpeed = jumpForce;
+        isOnGround = false;
+    }
 }
+
+// Keys that need holding down return false on release.
+void keyboardRelease(unsigned char key, int x, int y) {
+    if (key == 'a') moveLeft = false;
+    if (key == 'd') moveRight = false;
+}
+
 void mouse(int btn, int state, int x, int y) {
     if (appState != STATE_WIN || btn != GLUT_LEFT_BUTTON || state != GLUT_DOWN) return;
     int w = glutGet(GLUT_WINDOW_WIDTH), h = glutGet(GLUT_WINDOW_HEIGHT);
     win::click(x * win::VW / w, y * win::VH / h);
 }
+
 void passiveMotion(int x, int y) {
     if (appState != STATE_WIN) return;
     int w = glutGet(GLUT_WINDOW_WIDTH), h = glutGet(GLUT_WINDOW_HEIGHT);
     win::motion(x * win::VW / w, y * win::VH / h);
 }
+
+
+
+///////////////////////////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////// INITIALIZATION ///////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////////////////////
 
 void init() {
     glClearColor(0.1f, 0.1f, 0.2f, 1.0f);
@@ -342,8 +509,13 @@ int main(int argc, char** argv) {
     win::onReplay    = [](){ win::show(); };
     win::onMenu      = [](){ win::stopWinSound(); appState = STATE_LEVEL; };
     glutDisplayFunc(display);
+
+    glutTimerFunc(16, timer, 0); // Start off timer for physics updates
+
     glutKeyboardFunc(keyboard);
+    glutKeyboardUpFunc(keyboardRelease);
     glutMouseFunc(mouse);
+
     glutPassiveMotionFunc(passiveMotion);
     glutIdleFunc(display);
     glutMainLoop();
