@@ -5,6 +5,7 @@
 #include <GL/glew.h>
 #include <GL/glut.h>
 #include "winscreen.h"
+#include "background.h"
 
 using namespace std;
 
@@ -383,16 +384,7 @@ void display() {
     for (auto& l : *lights) l.pulse = frameTime * 4;
     
     // Background
-    glEnable(GL_TEXTURE_2D);
-    glBindTexture(GL_TEXTURE_2D, checkerTexture);
-    glColor3f(1,1,1);
-    glBegin(GL_QUADS);
-        glTexCoord2f(0,0); glVertex2f(-10, -5);
-        glTexCoord2f(1,0); glVertex2f(10, -5);
-        glTexCoord2f(1,1); glVertex2f(10, 5);
-        glTexCoord2f(0,1); glVertex2f(-10, 5);
-    glEnd();
-    glDisable(GL_TEXTURE_2D);
+    drawBackground();
     
     // Platforms
     for (auto& p : *platforms) {
@@ -496,13 +488,17 @@ void init() {
 
 int main(int argc, char** argv) {
     glutInit(&argc, argv);
-    glutInitDisplayMode(GLUT_DOUBLE | GLUT_RGB);
+    glutInitDisplayMode(GLUT_DOUBLE | GLUT_RGB | GLUT_DEPTH);
     glutInitWindowSize(1024, 768);
     glutInitWindowPosition(100, 50);
     glutCreateWindow("CS0045 Final - Level Preview");
     
     GLenum err = glewInit();
     if (err != GLEW_OK) return -1;
+
+    if (initBackground() != 0) {                                
+        return -1;
+    }
     
     init();
     win::onNextLevel = [](){ win::stopWinSound(); switchLevel(2); appState = STATE_LEVEL; };
