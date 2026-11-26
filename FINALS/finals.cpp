@@ -34,7 +34,7 @@ struct Light {
 
 int currentLevel = 1;
 
-enum AppState { STATE_LEVEL, STATE_WIN };
+enum AppState { STATE_LEVEL, STATE_WIN, STATE_COMPLETE };
 AppState appState = STATE_LEVEL;
 
 vector<Platform> level1Platforms = {
@@ -86,98 +86,6 @@ vector<Collectible>* coins = &level1Coins;
 vector<Light>* lights = &level1Lights;
 vector<GLfloat> trophyPolySlices;
 const double PI = 3.141592653589793;
-
-///////////////////////////////////////////////////////////////////////////////////////////////
-//////////////////////////////////////// LAST LEVEL WIN ///////////////////////////////////////
-///////////////////////////////////////////////////////////////////////////////////////////////
-
-void createPolygonSlice() {
-    for (int i = 0; i <= 32; i++) {
-        trophyPolySlices.push_back(cos(i * PI/16));
-        trophyPolySlices.push_back(sin(i * PI/16));
-    }
-}
-
-void trophyBase() {
-    glColor3ub(150, 75, 0); //brown base
-    glBegin(GL_QUADS); //bottom
-        glVertex3f(3.0, -5.0, 2.0);
-        glVertex3f(7.0, -5.0, 2.0);
-        glVertex3f(7.0, -5.0, -2.0);
-        glVertex3f(3.0, -5.0, -2.0);
-    glEnd();
-    glBegin(GL_QUADS); //front
-        glVertex3f(3.0, -5.0, 2.0);
-        glVertex3f(7.0, -5.0, 2.0);
-        glVertex3f(7.0, -4.0, 2.0);
-        glVertex3f(3.0, -4.0, 2.0);
-    glEnd();
-    glBegin(GL_QUADS); // left
-        glVertex3f(3.0, -5.0, 2.0);
-        glVertex3f(3.0, -4.0, 2.0);
-        glVertex3f(3.0, -4.0, -2.0);
-        glVertex3f(3.0, -5.0, -2.0);
-    glEnd();
-    glBegin(GL_QUADS); //right
-        glVertex3f(7.0, -5.0, 2.0);
-        glVertex3f(7.0, -4.0, 2.0);
-        glVertex3f(7.0, -4.0, -2.0);
-        glVertex3f(7.0, -5.0, -2.0);
-    glEnd();
-    glBegin(GL_QUADS); //top
-        glVertex3f(3.0, -4.0, 2.0);
-        glVertex3f(7.0, -4.0, 2.0);
-        glVertex3f(7.0, -4.0, -2.0);
-        glVertex3f(3.0, -4.0, -2.0);
-    glEnd();
-    glBegin(GL_QUADS); //back
-        glVertex3f(3.0, -5.0, -2.0);
-        glVertex3f(7.0, -5.0, -2.0);
-        glVertex3f(7.0, -4.0, -2.0);
-        glVertex3f(3.0, -4.0, -2.0);
-    glEnd();
-}
-
-void trophyLayer(float lowerY, float lowerR, float upperY, float upperR) {
-    glColor3ub(255, 210, 0); // gold "body"
-    glBegin(GL_QUAD_STRIP);
-        for (int i = 0; i <= 32; i++) {
-            glVertex3f(lowerR * trophyPolySlices[2*i], lowerY, lowerR * trophyPolySlices[2*i + 1]);
-            glVertex3f(upperR * trophyPolySlices[2*i], upperY, upperR * trophyPolySlices[2*i + 1]);
-        }
-    glEnd();
-}
-
-void drawD20() {
-    glPushMatrix();
-
-    GLfloat lightPosition[] = { 0.0f, 9.0f, 0.0f, 1.0f };
-    glTranslatef(-5.0f, 0.0f, 0.0f);
-    GLfloat negativeGold[] = { 0.0f, 0.82f, 1.0f, 1.0f };
-    GLfloat black[] = { 0.0f, 0.0f, 0.0f, 1.0f };
-    GLfloat white[] = { 1.0f, 1.0f, 1.0f, 1.0f };
-    glLightfv(GL_LIGHT0, GL_POSITION, lightPosition);
-
-    glMaterialfv(GL_FRONT, GL_DIFFUSE, negativeGold);
-    glMaterialfv(GL_FRONT, GL_AMBIENT, black);
-    glMaterialfv(GL_FRONT, GL_SPECULAR, white);
-    glMaterialfv(GL_FRONT, GL_EMISSION, black);
-    glMaterialf(GL_FRONT, GL_SHININESS, 100);
-
-    glutSolidIcosahedron();
-
-    glPopMatrix();
-}
-
-void displayComplete() {
-    glClear(GL_COLOR_BUFFER_BIT);
-    trophyBase();
-    for (int x = -4; x <= 4; x++) {
-        trophyLayer(x, sqrt((x+7)/3), x+1, sqrt((x+8)/3));
-    }
-    drawD20();
-    glFlush();
-}
 
 //////////////////////////// PLAYER //////////////////////////////////////////////////////////
 
@@ -303,6 +211,126 @@ void drawGrass(float x, float y, float w) {
     }
 }
 
+///////////////////////////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////// LAST LEVEL WIN ///////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////////////////////
+
+void createPolygonSlice() {
+    for (int i = 0; i <= 32; i++) {
+        trophyPolySlices.push_back(cos(i * PI/16));
+        trophyPolySlices.push_back(sin(i * PI/16));
+    }
+}
+
+void trophyBase() {
+    glColor3ub(150, 75, 0); //brown base
+    glBegin(GL_QUADS); //bottom
+        glVertex3f(3.0, -3.8, 2.0);
+        glVertex3f(7.0, -3.8, 2.0);
+        glVertex3f(7.0, -3.8, -2.0);
+        glVertex3f(3.0, -3.8, -2.0);
+    glEnd();
+    glBegin(GL_QUADS); //front
+        glVertex3f(3.0, -3.8, 2.0);
+        glVertex3f(7.0, -3.8, 2.0);
+        glVertex3f(7.0, -3.0, 2.0);
+        glVertex3f(3.0, -3.0, 2.0);
+    glEnd();
+    glBegin(GL_QUADS); // left
+        glVertex3f(3.0, -3.8, 2.0);
+        glVertex3f(3.0, -3.0, 2.0);
+        glVertex3f(3.0, -3.0, -2.0);
+        glVertex3f(3.0, -3.8, -2.0);
+    glEnd();
+    glBegin(GL_QUADS); //right
+        glVertex3f(7.0, -3.8, 2.0);
+        glVertex3f(7.0, -3.0, 2.0);
+        glVertex3f(7.0, -3.0, -2.0);
+        glVertex3f(7.0, -3.8, -2.0);
+    glEnd();
+    glBegin(GL_QUADS); //top
+        glVertex3f(3.0, -3.0, 2.0);
+        glVertex3f(7.0, -3.0, 2.0);
+        glVertex3f(7.0, -3.0, -2.0);
+        glVertex3f(3.0, -3.0, -2.0);
+    glEnd();
+    glBegin(GL_QUADS); //back
+        glVertex3f(3.0, -3.8, -2.0);
+        glVertex3f(7.0, -3.8, -2.0);
+        glVertex3f(7.0, -3.0, -2.0);
+        glVertex3f(3.0, -3.0, -2.0);
+    glEnd();
+}
+
+void trophyLayer(float lowerY, float lowerR, float upperY, float upperR) {
+    glColor3ub(255, 210, 0); // gold "body"
+    glBegin(GL_QUAD_STRIP);
+        for (int i = 0; i <= 32; i++) {
+            glVertex3f(lowerR * trophyPolySlices[2*i], lowerY, lowerR * trophyPolySlices[2*i + 1]);
+            glVertex3f(upperR * trophyPolySlices[2*i], upperY, upperR * trophyPolySlices[2*i + 1]);
+        }
+    glEnd();
+}
+
+void drawD20() {
+    glPushMatrix();
+
+    GLfloat lightPosition[] = { 0.0f, 9.0f, 9.0f, 1.0f };
+    glTranslatef(-5.0f, 0.0f, 9.0f);
+    GLfloat negativeGold[] = { 0.0f, 0.82f, 1.0f, 1.0f };
+    GLfloat black[] = { 0.0f, 0.0f, 0.0f, 1.0f };
+    GLfloat white[] = { 1.0f, 1.0f, 1.0f, 1.0f };
+    glLightfv(GL_LIGHT0, GL_POSITION, lightPosition);
+
+    glMaterialfv(GL_FRONT, GL_DIFFUSE, negativeGold);
+    glMaterialfv(GL_FRONT, GL_AMBIENT, black);
+    glMaterialfv(GL_FRONT, GL_SPECULAR, white);
+    glMaterialfv(GL_FRONT, GL_EMISSION, black);
+    glMaterialf(GL_FRONT, GL_SHININESS, 100);
+
+    glutSolidIcosahedron();
+
+    glPopMatrix();
+}
+
+void displayComplete() {
+    // Keep the level's x/y coordinates but allow the full depth of the 3D objects.
+    glMatrixMode(GL_PROJECTION);
+    glPushMatrix();
+    glLoadIdentity();
+    glOrtho(-10, 10, -5, 5, -10, 10);
+    glMatrixMode(GL_MODELVIEW);
+
+    glClear(GL_DEPTH_BUFFER_BIT);
+    glEnable(GL_DEPTH_TEST);
+    glPushMatrix();
+    glTranslatef(5.0f, -5.0f, 0.0f);
+    glScalef(0.75f, 0.75f, 0.75f); // leave space above the trophy
+    glTranslatef(-5.0f, 5.0f, 0.0f);
+    trophyBase();
+    glPushMatrix();
+    glTranslatef(5.0f, 0.0f, 0.0f); // center the trophy body on its base
+    for (int x = -3; x <= 4; x++) {
+        trophyLayer(x, sqrt((x+7)/3), x+1, sqrt((x+8)/3));
+    }
+    glPopMatrix();
+    glPopMatrix();
+
+
+    drawText(-2.5f, 0, "You are the GOAT3D Winner!", 0.0f, 1.0f, 1.0f);
+
+    glEnable(GL_LIGHTING);
+    glEnable(GL_LIGHT0);
+    drawD20();
+    glDisable(GL_LIGHT0);
+    glDisable(GL_LIGHTING);
+    glDisable(GL_DEPTH_TEST);
+
+    glMatrixMode(GL_PROJECTION);
+    glPopMatrix();
+    glMatrixMode(GL_MODELVIEW);
+}
+
 /////////////////////////////// LIGHTS CAMERA ACTION ////////////////////////////////////////
 
 void drawLight(float x, float y, float w, float h, float r, float g, float b, float pulse) {
@@ -331,6 +359,7 @@ void drawLight(float x, float y, float w, float h, float r, float g, float b, fl
 }
 
 void switchLevel(int level) {
+    appState = STATE_LEVEL;
     currentLevel = level;
     if (level == 1) {
         platforms = &level1Platforms;
@@ -457,7 +486,7 @@ void updatePlayer() {
 
 // Timer for consistent movement across frames
 void timer(int value) {
-    updatePlayer();
+    if (appState != STATE_COMPLETE) updatePlayer();
     glutTimerFunc(16, timer, 0); // Approximately 60 FPS
 }
 
@@ -479,6 +508,11 @@ void display() {
     
     // Background
     drawBackground();
+    if (appState == STATE_COMPLETE) {
+        displayComplete();
+        glutSwapBuffers();
+        return;
+    }
     
     // Platforms
     for (auto& p : *platforms) {
@@ -528,7 +562,7 @@ void keyboard(unsigned char key, int x, int y) {
     if (key == '1') switchLevel(1);
     if (key == '2') switchLevel(2);
     if ((key == 'c' || key == 'C') && currentLevel == 1) { appState = STATE_WIN; win::show(); } // demo: wire to exit collision
-    if ((key == 'c' || key == 'C') && currentLevel == 2) { displayComplete(); } // demo: wire to exit collision
+    if ((key == 'c' || key == 'C') && currentLevel == 2) { appState = STATE_COMPLETE; glutPostRedisplay(); } // demo: wire to exit collision
     
     // Player movement
     if (key == 'a') moveLeft = true;
